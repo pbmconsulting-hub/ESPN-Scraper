@@ -93,13 +93,36 @@ def get_gamelog(player_id: str) -> dict:
 
     category = categories[0]
     labels = category.get("labels", [])
-    events = category.get("events", [])
+    # categories[0]["events"] is a dict mapping event ID → game metadata
+    events_meta = category.get("events", {})
+    if not isinstance(events_meta, dict):
+        events_meta = {}
 
-    if not events:
+    # The actual per-game stat rows live in summary["stats"] (list of lists)
+    # and the event ordering lives in summary["events"] (list of {"id": "..."})
+    summary_block = season_block.get("summary", {})
+    stat_rows = summary_block.get("stats", [])
+    event_order = summary_block.get("events", [])
+
+    if not event_order or not stat_rows:
         return _empty_result(player_id, f"No games found in {season_type_name}")
 
+    # Build game dicts by combining event metadata with stat rows
+    all_games: list[dict] = []
+    for i, event_ref in enumerate(event_order):
+        event_id = str(event_ref.get("id", ""))
+        meta = events_meta.get(event_id, {})
+        stats = stat_rows[i] if i < len(stat_rows) else []
+        game = {
+            "event_id": event_id,
+            "gameDate": meta.get("gameDate", "N/A"),
+            "opponent": meta.get("opponent", {}),
+            "stats": stats,
+        }
+        all_games.append(game)
+
     # Games come newest-first → slice top 3 for L3
-    last_3 = events[:3]
+    last_3 = all_games[:3]
 
     l3_averages = _compute_averages(last_3, labels)
     def_rating = _defensive_rating(l3_averages)
@@ -108,7 +131,7 @@ def get_gamelog(player_id: str) -> dict:
         "player_id": player_id,
         "season_type": season_type_name,
         "labels": labels,
-        "all_games": events,
+        "all_games": all_games,
         "last_3_games": last_3,
         "l3_averages": l3_averages,
         "defensive_rating": def_rating,

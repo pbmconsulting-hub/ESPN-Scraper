@@ -27,6 +27,7 @@ from espn_scraper.scoreboard import get_scoreboard, print_scoreboard
 from espn_scraper.summary import get_summary, print_summary
 from espn_scraper.gamelog import get_gamelog, print_gamelog
 from espn_scraper.athlete import get_athlete, print_athlete
+from espn_scraper.utils import normalize_date
 
 # ---------------------------------------------------------------------------
 # Configuration (override via environment variables)
@@ -225,4 +226,10 @@ def run_pipeline(date: str = None, max_games: int = 0, max_players: int = 3) -> 
 if __name__ == "__main__":
     # Allow a date argument: python main.py 20240301
     date_arg = sys.argv[1] if len(sys.argv) > 1 else ESPN_DATE
+    if date_arg:
+        try:
+            date_arg = normalize_date(date_arg)
+        except ValueError as exc:
+            print(f"ERROR: {exc}")
+            sys.exit(1)
     run_pipeline(date=date_arg, max_games=MAX_GAMES, max_players=MAX_PLAYERS)
