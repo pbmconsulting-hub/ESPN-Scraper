@@ -18,6 +18,7 @@ from espn_scraper.athlete import get_athlete, print_athlete
 
 SEPARATOR = "=" * 72
 SECTION_SEP = "-" * 72
+MAX_DISPLAYED_PLAYER_IDS = 20
 
 MENU = """
 ========================================================================
@@ -76,9 +77,9 @@ def view_summary(game_id: str) -> dict | None:
 
     print_summary(summary)
     ids = summary.get("player_ids", [])
-    print(f"\n  Player IDs in this game ({len(ids)}): {', '.join(ids[:20])}")
-    if len(ids) > 20:
-        print(f"  ... and {len(ids) - 20} more")
+    print(f"\n  Player IDs in this game ({len(ids)}): {', '.join(ids[:MAX_DISPLAYED_PLAYER_IDS])}")
+    if len(ids) > MAX_DISPLAYED_PLAYER_IDS:
+        print(f"  ... and {len(ids) - MAX_DISPLAYED_PLAYER_IDS} more")
     return summary
 
 
@@ -148,7 +149,7 @@ def run_full_pipeline() -> None:
         player_name_map: dict[str, str] = {
             p["player_id"]: p["player_name"]
             for p in summary.get("player_stats", [])
-            if p.get("player_id")
+            if p.get("player_id") and p.get("player_name")
         }
 
         for pid in player_ids:
