@@ -13,6 +13,8 @@ Purpose:
 
 import requests
 
+from espn_scraper.utils import normalize_date
+
 SCOREBOARD_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
 )
@@ -48,7 +50,10 @@ def get_scoreboard(date: str = None) -> list[dict]:
     """
     params = {}
     if date:
-        params["dates"] = date
+        try:
+            params["dates"] = normalize_date(date)
+        except ValueError as exc:
+            raise RuntimeError(str(exc)) from exc
 
     try:
         response = requests.get(SCOREBOARD_URL, params=params, timeout=_TIMEOUT)

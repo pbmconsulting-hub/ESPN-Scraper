@@ -15,6 +15,7 @@ from espn_scraper.scoreboard import get_scoreboard, print_scoreboard
 from espn_scraper.summary import get_summary, print_summary
 from espn_scraper.gamelog import get_gamelog, print_gamelog
 from espn_scraper.athlete import get_athlete, print_athlete
+from espn_scraper.utils import normalize_date
 
 SEPARATOR = "=" * 72
 SECTION_SEP = "-" * 72
@@ -112,7 +113,14 @@ def view_athlete(player_id: str) -> dict | None:
 def run_full_pipeline() -> None:
     """Interactive full pipeline: scoreboard → pick a game → box score → players."""
     date = _prompt("Date (YYYYMMDD or blank for today)")
-    date = date if date else None
+    if date:
+        try:
+            date = normalize_date(date)
+        except ValueError as exc:
+            print(f"  ERROR: {exc}")
+            return
+    else:
+        date = None
 
     games = view_scoreboard(date)
     if not games:
@@ -185,6 +193,11 @@ def main() -> None:
         elif choice == "2":
             date = _prompt("Enter date (YYYYMMDD)")
             if date:
+                try:
+                    date = normalize_date(date)
+                except ValueError as exc:
+                    print(f"  ERROR: {exc}")
+                    continue
                 view_scoreboard(date)
             else:
                 print("  No date entered.")
