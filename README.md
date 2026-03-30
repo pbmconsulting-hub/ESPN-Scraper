@@ -55,7 +55,8 @@ projections.
 
 ```
 ESPN-Scraper/
-├── main.py                  # Full pipeline entry point
+├── cli.py                   # Interactive menu (run individual steps or full pipeline)
+├── main.py                  # Non-interactive full pipeline entry point
 ├── requirements.txt         # Python dependencies
 ├── README.md
 └── espn_scraper/            # Modular API clients
@@ -86,6 +87,19 @@ pip install -r requirements.txt
 ---
 
 ## Usage
+
+### Interactive CLI (recommended for testing)
+
+```bash
+python cli.py
+```
+
+This opens a menu where you can:
+- View today's scoreboard or a specific date's games
+- Get a box score for any game by Game ID
+- Look up a player's gamelog / L3 averages by Player ID
+- Look up a player profile by Player ID
+- Run the full pipeline interactively (pick a game, set max players, etc.)
 
 ### Run the full pipeline (today's games)
 
